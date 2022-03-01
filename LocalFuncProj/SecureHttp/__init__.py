@@ -15,7 +15,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
              "Authentication error: Authorization header is missing",
              status_code=401
         )
-    parts = token.split()
+    parts = auth.split()
 
     if parts[0].lower() != "bearer":
         return func.HttpResponse("Authentication error: Authorization header must start with ' Bearer'", 401)
