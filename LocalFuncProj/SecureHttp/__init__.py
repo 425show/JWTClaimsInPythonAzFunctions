@@ -9,13 +9,22 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     
     logging.info('Python HTTP trigger function processed a request.')
 
-    token = req.headers.get("X-MS-TOKEN-AAD-ACCESS-TOKEN", None)
-    if not token:
+    auth = req.headers.get("Authorization", None)
+    if not auth:
         return func.HttpResponse(
-            "Please pass the Azure AD Access Token in the X-MS-TOKEN-AAD-ACCESS-TOKEN header",
-            status_code=401
+             "Authentication error: Authorization header is missing",
+             status_code=401
         )
-    token_claims = jwt.get_unverified_claims(token)
+    parts = token.split()
+
+    if parts[0].lower() != "bearer":
+        return func.HttpResponse("Authentication error: Authorization header must start with ' Bearer'", 401)
+    elif len(parts) == 1:
+        return func.HttpResponse("Authentication error: Token not found", 401)
+    elif len(parts) > 2:
+        return func.HttpResponse("Authentication error: Authorization header must be 'Bearer <token>'", 401)
+
+    token_claims = jwt.get_unverified_claims(parts[1])
 
     # Do anything else you need here
 
